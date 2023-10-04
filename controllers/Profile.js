@@ -1,5 +1,7 @@
 const Profile = require("../models/Profile");
 const User = require("../models/User");
+const Course = require("../models/Course")
+
 
 exports.updateProfile = async(req, res) => {
     try{
@@ -61,15 +63,49 @@ exports.deleteAccount = async (req, res) => {
 
         //delete profile
         await Profile.findByIdAndDelete({_id:userDetails.additionalDetails});
+
         //TODO: HW unenroll user from all enrolled courses
+        for (const courseId of User.courses) {
+            await Course.findByIdAndUpdate(
+              courseId,
+              { $pull: { studentsEnroled: id } },
+              { new: true }
+            )
+          }
+
         //delete user
         await User.findByIdAndDelete({_id:id});
         //return response
         return res.status(200).json({
             success:true,
-            message:'Profile deleted succesfully',
+            message:'User deleted succesfully',
         });
     }catch(error){
+        return res.status(500).json({
+            success:false,
+            message:'User cannot be deletes succesfully',
+        });
+    }
+};
 
+exports.getAllUserDetails = async (req, res)=>{
+    try{
+        //get id
+        const id = req.user.id;
+        //validation and get user details
+        const userDetails = await User.findById(id).populate("additionalDetails").exec();
+        
+        //return response
+        return res.status(200).json({
+            success:true,
+            message:"User Data Fetched succesfully",
+        });
+
+
+    }catch(error){
+        return res.status(500).json({
+            success:false,
+            message:error.message,
+        });
     }
 }
