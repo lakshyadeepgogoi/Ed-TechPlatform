@@ -1,111 +1,88 @@
 const Profile = require("../models/Profile");
 const User = require("../models/User");
-const Course = require("../models/Course")
+const { uploadImageToCloudinary } = require("../utils/imageUploader");
+// Method for updating a profile
+exports.updateProfile = async (req, res) => {
+	try {
+		const { dateOfBirth = "", about = "", contactNumber } = req.body;
+		const id = req.user.id;
 
+		// Find the profile by id
+		const userDetails = await User.findById(id);
+		const profile = await Profile.findById(userDetails.additionalDetails);
 
-exports.updateProfile = async(req, res) => {
-    try{
-        //Get data
-        const {dateOfBirth="", about="", contactNumber,  gender} = req.body;
-        // get UserID
-        const id = req.user.id ;
-        //Validation
-        if(!contactNumber || !gender || !id){
-            return res.status(400).json({
-                success:false,
-                message:"All fields are required",
-            });
-        }
-        //Find profile
-        const userDetails = await User.findById(id);
-        const profileId = userDetails.additionalDetails;
-        const profileDetails = await Profile.findById(profileId);
+		// Update the profile fields
+		profile.dateOfBirth = dateOfBirth;
+		profile.about = about;
+		profile.contactNumber = contactNumber;
 
+		// Save the updated profile
+		await profile.save();
 
-        //update profile
-        profileDetails.dateOfBirth = dateOfBirth;
-        profileDetails.about = about;
-        profileDetails.gender = gender;
-        profileDetails.contactNumber = contactNumber;
-        await profileDetails.save();
-
-        
-        // return response
-        return res.status(200).json({
-            success:true,
-            message:'Profile updated succesfully',
-            profileDetails,
-        });
-    }
-    catch(error){
-        return res.status(500).json({
-            success:false,
-            //message:'Error occurs in update a profile',
-            error:error.message,
-        });
-    }
+		return res.json({
+			success: true,
+			message: "Profile updated successfully",
+			profile,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			success: false,
+			error: error.message,
+		});
+	}
 };
-
-//Delete account function
 
 exports.deleteAccount = async (req, res) => {
-    try{
-        //get id 
-        const id = req.user.id;
-        //check validation
-        const userDetails = await User.findById(id);
-        if(!userDetails){
-            return res.status(404).json({
-                success:false,
-                message:'User not found',
-            });
-        }
-
-        //delete profile
-        await Profile.findByIdAndDelete({_id:userDetails.additionalDetails});
-
-        //TODO: HW unenroll user from all enrolled courses
-        for (const courseId of User.courses) {
-            await Course.findByIdAndUpdate(
-              courseId,
-              { $pull: { studentsEnroled: id } },
-              { new: true }
-            )
-          }
-
-        //delete user
-        await User.findByIdAndDelete({_id:id});
-        //return response
-        return res.status(200).json({
-            success:true,
-            message:'User deleted succesfully',
-        });
-    }catch(error){
-        return res.status(500).json({
-            success:false,
-            message:'User cannot be deletes succesfully',
-        });
-    }
+	try {
+		// TODO: Find More on Job Schedule
+		// const job = schedule.scheduleJob("10 * * * * *", function () {
+		// 	console.log("The answer to life, the universe, and everything!");
+		// });
+		// console.log(job);
+		const id = req.user.id;
+		const user = await User.findById({ _id: id });
+		if (!user) {
+			return res.status(404).json({
+				success: false,
+				message: "User not found",
+			});
+		}
+		// Delete Assosiated Profile with the User
+		await Profile.findByIdAndDelete({ _id: user.userDetails });
+		// TODO: Unenroll User From All the Enrolled Courses
+		// Now Delete User
+		await user.findByIdAndDelete({ _id: id });
+		res.status(200).json({
+			success: true,
+			message: "User deleted successfully",
+		});
+	} catch (error) {
+		console.log(error);
+		res
+			.status(500)
+			.json({ success: false, message: "User Cannot be deleted successfully" });
+	}
 };
 
-exports.getAllUserDetails = async (req, res)=>{
-    try{
-        //get id
-        const id = req.user.id;
-        //validation and get user details
-        const userDetails = await User.findById(id).populate("additionalDetails").exec();
-        
-        //return response
-        return res.status(200).json({
-            success:true,
-            message:"User Data Fetched succesfully",
-        });
+exports.getAllUserDetails = async (req, res) => {
+	try {
+		const id = req.user.id;
+		const userDetails = await User.findById(id)
+			.populate("additionalDetails")
+			.exec();
+		console.log(userDetails);
+		res.status(200).json({
+			success: true,
+			message: "User Data fetched successfully",
+			data: userDetails,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: error.message,
+		});
+	}
+};
 
-
-    }catch(error){
-        return res.status(500).json({
-            success:false,
-            message:error.message,
-        });
-    }
-}
+//updateDisplayPicture
