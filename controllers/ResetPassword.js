@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const mailSender = require("../utils/mailSender");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 exports.resetPasswordToken = async (req, res) => {
 	try {
@@ -20,7 +21,7 @@ exports.resetPasswordToken = async (req, res) => {
 				token: token,
 				resetPasswordExpires: Date.now() + 3600000,
 			},
-			{ new: true }
+			{ new: true } 
 		);
 		console.log("DETAILS", updatedDetails);
 
