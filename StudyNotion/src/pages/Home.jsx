@@ -5,10 +5,12 @@ import HighlightText from "../components/core/Homepage/HighlightText";
 import CTAButton from "../components/core/Homepage/Button";
 import Banner from "../assets/Images/banner.mp4";
 import CodeBlocks from "../components/core/Homepage/CodeBlocks";
-// import Footer from "../components/common/Footer";
+import Footer from "../components/common/Footer";
 import ExploreMore from "../components/core/Homepage/ExploreMore";
 import TimelineSection from "../components/core/Homepage/TimelineSection";
 import LearningLanguageSection from "../components/core/Homepage/LearningLanguageSection";
+import InstructorSection from "../components/core/Homepage/InstructorSection";
+import ReviewSlider from "../components/common/ReviewSlider";
 
 function Home() {
   return (
@@ -61,7 +63,7 @@ function Home() {
         {/* code section 1  */}
         <div>
           <CodeBlocks
-            position={"lg:flex-row"}
+            position={"lg:flex-row flex-col"}
             heading={
               <div className="text-4xl font-bold">
                 Unlock Your
@@ -91,7 +93,7 @@ function Home() {
         {/* code section 2  */}
         <div>
           <CodeBlocks
-            position={"lg:flex-row-reverse "}
+            position={"lg:flex-row-reverse flex-col "}
             heading={
               <div className="w-[100%] text-4xl font-semibold lg:w-[50%]">
                 Start
@@ -161,18 +163,26 @@ function Home() {
           <LearningLanguageSection/>
 
 
-        </div>
-
-        
+        </div>     
 
 
 
       </div>
 
       {/* section 3 */}
+      <div className="relative mx-auto my-20 flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 bg-richblack-900 text-white">
+        {/* Become a instructor section */}
+        <InstructorSection />
+
+        {/* Reviws from Other Learner */}
+        <h1 className="text-center text-4xl font-semibold mt-8">
+          Reviews from other learners
+        </h1>
+        <ReviewSlider />
+      </div>
 
       {/* Footer */}
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 }
